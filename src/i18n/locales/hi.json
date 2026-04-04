@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "welcome": "Swagat hai,",
+    "hello": "Namaste,",
+    "guest": "Guest",
+    "farmOverview": "Farm Overview",
+    "acresActive": "Acres",
+    "cropStatus": "Crop Status",
+    "soilTemp": "Soil Temp",
+    "services": "Services",
+    "smartAlerts": "Smart Alerts",
+    "adminSettings": "Admin Settings",
+    "simulatePush": "Notifications",
+    "diseaseDetect": "Disease Detect",
+    "cropRecommend": "Crop Recommend",
+    "marketplace": "Marketplace",
+    "credit": "Credit",
+    "weather": "Weather",
+    "riskPredictor": "Risk Predictor",
+    "workers": "Workers",
+    "calendar": "Calendar",
+    "plantStatus": "Plant Status",
+    "plantMsg": "Plant Msg"
+  },
+  "crop": {
+    "title": "Crop Recommendation",
+    "heroTitle": "Smart Crop Recommendation",
+    "heroText": "Bas apni mitti aur aas-paas ke mausam ke baare mein batayein, aur humara AI aapko sabse zyada munafe wali fasal batayega!",
+    "soilTypeLabel": "1. Mitti Kaisi Hai? (Soil Type)",
+    "seasonLabel": "2. Kaunsa Mausam Hai? (Season)",
+    "weatherStatsLabel": "3. Mausam Ka Haal (Weather Stats)",
+    "temp": "Garmi (Temp °C)",
+    "humidity": "Humidity (%)",
+    "rain": "Barish mm",
+    "analyzeBtn": "Analyze",
+    "recommendedTitle": "Sabse Badiya Faslein",
+    "match": "Match",
+    "perfectCondition": "Is fasal ke liye mausam bilkul sahi hai",
+    "missingInfo": "Jankari Adhoori Hai",
+    "missingInfoMsg": "Kripya sabhi box mein mausam ki jankari daalein.",
+    "error": "Error"
+  },
+  "common": {
+    "language": "Bhasha",
+    "changeLang": "En / Hg"
+  }
+}

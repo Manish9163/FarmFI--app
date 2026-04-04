@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "welcome": "Welcome back,",
+    "hello": "Hello,",
+    "guest": "Guest Farmer",
+    "farmOverview": "Farm Overview",
+    "acresActive": "Acres Active",
+    "cropStatus": "Crop Status",
+    "soilTemp": "Soil Temp",
+    "services": "Services",
+    "smartAlerts": "Smart Alerts",
+    "adminSettings": "Admin Settings",
+    "simulatePush": "Simulate DB Push Notifications",
+    "diseaseDetect": "Disease Detect",
+    "cropRecommend": "Crop Recommend",
+    "marketplace": "Marketplace",
+    "credit": "Credit & Finance",
+    "weather": "Weather",
+    "riskPredictor": "Risk Predictor",
+    "workers": "Workers",
+    "calendar": "Planting Calendar",
+    "plantStatus": "Plant Wheat Today",
+    "plantMsg": "Schedules Registered ✅"
+  },
+  "crop": {
+    "title": "Crop Advisor",
+    "heroTitle": "Smart Crop Advisor",
+    "heroText": "Simply tell us about your soil and local weather, and our AI will suggest the most profitable crops for you to plant!",
+    "soilTypeLabel": "1. Soil Type",
+    "seasonLabel": "2. Season",
+    "weatherStatsLabel": "3. Weather Stats",
+    "temp": "Temperature (°C)",
+    "humidity": "Humidity (%)",
+    "rain": "Rain (mm)",
+    "analyzeBtn": "Analyze & Predict",
+    "recommendedTitle": "Recommended Crops",
+    "match": "Match",
+    "perfectCondition": "Perfect conditions for this crop",
+    "missingInfo": "Missing Info",
+    "missingInfoMsg": "Please fill in all weather conditions.",
+    "error": "Error"
+  },
+  "common": {
+    "language": "Language",
+    "changeLang": "Eng / Hng"
+  }
+}
