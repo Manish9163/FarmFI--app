@@ -23,7 +23,7 @@ import CreditScreen from './src/screens/CreditScreen';
 import RiskScreen from './src/screens/RiskScreen';
 import WorkersScreen from './src/screens/WorkersScreen';
 import PlantingCalendarScreen from './src/screens/PlantingCalendarScreen';
-import VegetableMarketScreen from './src/screens/VegetableMarketScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 import { AuthProvider } from './src/hooks/useAuth';
 
@@ -99,10 +99,10 @@ export default function App() {
             <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
             <Stack.Screen name="Cart" component={CartScreen} />
             <Stack.Screen name="PlantingCalendar" component={PlantingCalendarScreen} />
-            <Stack.Screen name="VegetableMarket" component={VegetableMarketScreen} />
             <Stack.Screen name="Risk" component={RiskScreen} />
             <Stack.Screen name="Weather" component={WeatherScreen} />
             <Stack.Screen name="Workers" component={WorkersScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </AuthProvider>

@@ -39,6 +39,46 @@ def run_migrations():
                 FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
             )
         ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                farmer_id INT NOT NULL,
+                total_amount DECIMAL(12,2) NOT NULL,
+                status VARCHAR(50) DEFAULT 'confirmed',
+                payment_method VARCHAR(50) DEFAULT 'Cash',
+                delivery_address TEXT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        ''')
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS veg_orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                buyer_id INT NOT NULL,
+                farmer_id INT NOT NULL,
+                vegetable_id INT NOT NULL,
+                vegetable_name VARCHAR(255),
+                quantity_kg DECIMAL(10,2) NOT NULL,
+                price_per_kg DECIMAL(10,2) NOT NULL,
+                total_amount DECIMAL(12,2) NOT NULL,
+                status VARCHAR(50) DEFAULT 'confirmed',
+                ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (farmer_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (vegetable_id) REFERENCES vegetables(id) ON DELETE CASCADE
+            )
+        ''')
+        
+        # Defensive check to ALTER orders table for backwards compatibility
+        cursor.execute("SHOW COLUMNS FROM orders LIKE 'payment_method'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Cash'")
+        
+        cursor.execute("SHOW COLUMNS FROM orders LIKE 'delivery_address'")
+        if not cursor.fetchone():
+            cursor.execute("ALTER TABLE orders ADD COLUMN delivery_address TEXT")
         conn.commit()
         print("[DB] Migrations executed successfully.")
     except Exception as e:

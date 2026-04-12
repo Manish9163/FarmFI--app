@@ -133,11 +133,20 @@ def all_orders():
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute(
-            "SELECT o.*, u.full_name AS farmer_name "
-            "FROM orders o JOIN users u ON o.farmer_id = u.id "
-            "ORDER BY o.created_at DESC LIMIT 100"
+            "SELECT o.*, f.full_name AS farmer_name, b.full_name AS buyer_name "
+            "FROM orders o "
+            "JOIN users f ON o.farmer_id = f.id "
+            "JOIN users b ON o.buyer_id = b.id "
+            "ORDER BY o.ordered_at DESC LIMIT 100"
         )
-        return jsonify(cursor.fetchall()), 200
+        # Handle string serialization for decimals/dates 
+        rows = cursor.fetchall()
+        for r in rows:
+            r['ordered_at'] = str(r['ordered_at']) if r.get('ordered_at') else ''
+            r['quantity_kg'] = float(r['quantity_kg'])
+            r['price_per_kg'] = float(r['price_per_kg'])
+            r['total_amount'] = float(r['total_amount'])
+        return jsonify(rows), 200
     finally:
         cursor.close()
         conn.close()
@@ -162,7 +171,220 @@ def update_order_status(order_id):
         cursor.close()
         conn.close()
 
+# KYC
+@admin_bp.route('/kyc', methods=['GET'])
+@token_required
+@role_required('Admin')
+def list_kyc():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute('''
+            SELECT k.*, u.role_id, r.role_name 
+            FROM kyc_profiles k 
+            JOIN users u ON k.user_id = u.id 
+            JOIN roles r ON u.role_id = r.id
+            ORDER BY k.updated_at DESC
+        ''')
+        rows = cursor.fetchall()
+        for r in rows:
+            r['updated_at'] = str(r['updated_at']) if r.get('updated_at') else ''
+        return jsonify(rows), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
+@admin_bp.route('/kyc/<int:kyc_id>', methods=['PATCH'])
+@token_required
+@role_required('Admin')
+def update_kyc(kyc_id):
+    data = request.get_json(silent=True) or {}
+    status = data.get('status', 'verified')
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE kyc_profiles SET status = %s WHERE id = %s", (status, kyc_id))
+        conn.commit()
+        return jsonify({'message': f'KYC status updated to {status}'}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# VEGETABLES
+@admin_bp.route('/vegetables', methods=['GET'])
+@token_required
+@role_required('Admin')
+def list_vegetables():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute('''
+            SELECT v.*, u.full_name as farmer_name 
+            FROM vegetables v 
+            JOIN users u ON v.farmer_id = u.id 
+            ORDER BY v.created_at DESC
+        ''')
+        rows = cursor.fetchall()
+        for r in rows:
+            r['created_at'] = str(r['created_at']) if r.get('created_at') else ''
+            r['price_per_kg'] = float(r['price_per_kg']) if r.get('price_per_kg') else 0
+            # Ensure quantity_kg string conversion for UI ease
+            r['quantity_kg'] = str(r['quantity_kg'])
+        return jsonify(rows), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
+#  BUYERS 
+@admin_bp.route('/buyers', methods=['GET'])
+@token_required
+@role_required('Admin')
+def list_buyers():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT u.id, u.full_name, u.email, u.phone, u.is_active, u.created_at, "
+            "b.business_name, b.city, b.total_orders, b.total_spent "
+            "FROM users u "
+            "JOIN roles r ON u.role_id = r.id "
+            "LEFT JOIN buyer_profiles b ON b.user_id = u.id "
+            "WHERE r.role_name = 'Buyer' ORDER BY u.created_at DESC"
+        )
+        return jsonify(cursor.fetchall()), 200
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_bp.route('/buyers', methods=['POST'])
+@token_required
+@role_required('Admin')
+def create_buyer():
+    data = request.get_json(silent=True) or {}
+    full_name = (data.get('full_name') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    phone = (data.get('phone') or '').strip()
+    password = data.get('password') or ''
+    is_active = bool(data.get('is_active', True))
+    business_name = (data.get('business_name') or '').strip()
+    city = (data.get('city') or '').strip()
+
+    if not all([full_name, email, phone, password]):
+        return jsonify({'error': 'full_name, email, phone, password are required'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        buyer_role_id = _role_id(cursor, 'Buyer')
+        if not buyer_role_id:
+            return jsonify({'error': 'Buyer role not found'}), 500
+
+        pwd_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        cursor.execute(
+            "INSERT INTO users (role_id, full_name, email, phone, password_hash, is_active) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (buyer_role_id, full_name, email, phone, pwd_hash, is_active)
+        )
+        user_id = cursor.lastrowid
+
+        cursor.execute(
+            "INSERT INTO buyer_profiles (user_id, business_name, city) "
+            "VALUES (%s, %s, %s)",
+            (user_id, business_name, city)
+        )
+        
+        cursor.execute("INSERT IGNORE INTO wallets (user_id) VALUES (%s)", (user_id,))
+        conn.commit()
+        return jsonify({'id': user_id, 'message': 'Buyer created'}), 201
+    except mysql.connector.IntegrityError as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_bp.route('/buyers/<int:user_id>', methods=['PUT'])
+@token_required
+@role_required('Admin')
+def update_buyer(user_id):
+    data = request.get_json(silent=True) or {}
+    full_name = (data.get('full_name') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    phone = (data.get('phone') or '').strip()
+    password = (data.get('password') or '').strip()
+    is_active = bool(data.get('is_active', True))
+    business_name = (data.get('business_name') or '').strip()
+    city = (data.get('city') or '').strip()
+
+    if not all([full_name, email, phone]):
+        return jsonify({'error': 'full_name, email, phone are required'}), 400
+
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "SELECT u.id FROM users u JOIN roles r ON u.role_id = r.id "
+            "WHERE u.id = %s AND r.role_name = 'Buyer'",
+            (user_id,)
+        )
+        if not cursor.fetchone():
+            return jsonify({'error': 'Buyer not found'}), 404
+
+        if password:
+            pwd_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cursor.execute(
+                "UPDATE users SET full_name=%s, email=%s, phone=%s, password_hash=%s, is_active=%s WHERE id=%s",
+                (full_name, email, phone, pwd_hash, is_active, user_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE users SET full_name=%s, email=%s, phone=%s, is_active=%s WHERE id=%s",
+                (full_name, email, phone, is_active, user_id)
+            )
+            
+        cursor.execute(
+            "UPDATE buyer_profiles SET business_name=%s, city=%s WHERE user_id=%s",
+            (business_name, city, user_id)
+        )
+        conn.commit()
+        return jsonify({'message': 'Buyer updated'}), 200
+    except mysql.connector.IntegrityError as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 400
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_bp.route('/buyers/<int:user_id>', methods=['DELETE'])
+@token_required
+@role_required('Admin')
+def delete_buyer(user_id):
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            "DELETE u FROM users u "
+            "JOIN roles r ON u.role_id = r.id "
+            "WHERE u.id = %s AND r.role_name = 'Buyer'",
+            (user_id,)
+        )
+        if cursor.rowcount == 0:
+            return jsonify({'error': 'Buyer not found'}), 404
+        conn.commit()
+        return jsonify({'message': 'Buyer deleted'}), 200
+    finally:
+        cursor.close()
+        conn.close()
+
+
+# FARMERS
 @admin_bp.route('/customers', methods=['GET'])
 @token_required
 @role_required('Admin')
@@ -607,7 +829,7 @@ def disease_distribution():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT disease_name as result_disease, COUNT(*) as count FROM disease_records WHERE disease_name IS NOT NULL AND disease_name != '' GROUP BY disease_name ORDER BY count DESC LIMIT 10")
+        cursor.execute("SELECT predicted_disease as result_disease, COUNT(*) as count FROM disease_records WHERE predicted_disease IS NOT NULL AND predicted_disease != '' GROUP by predicted_disease ORDER BY count DESC LIMIT 10")
         rows = cursor.fetchall()
         ret = [{'disease_name': r['result_disease'], 'count': r['count']} for r in rows]
         return jsonify(ret), 200
@@ -622,9 +844,26 @@ def crop_recommendations():
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT predicted_crop as crop_name, COUNT(*) as recommendation_count FROM crop_predictions WHERE predicted_crop IS NOT NULL GROUP BY predicted_crop ORDER BY recommendation_count DESC LIMIT 10")
+        import json
+        from collections import Counter
+        cursor.execute("SELECT recommended_crops FROM crop_predictions WHERE recommended_crops IS NOT NULL")
         rows = cursor.fetchall()
-        return jsonify(rows), 200
+        
+        counter = Counter()
+        for r in rows:
+            try:
+                crops_list = json.loads(r['recommended_crops'])
+                if crops_list and isinstance(crops_list, list):
+                    # Take highest rated crop from prediction
+                    top_crop = crops_list[0].get('crop')
+                    if top_crop:
+                        counter[top_crop] += 1
+            except Exception:
+                continue
+
+        top_10 = counter.most_common(10)
+        ret = [{'crop_name': crop, 'recommendation_count': count} for crop, count in top_10]
+        return jsonify(ret), 200
     finally:
         cursor.close()
         conn.close()

@@ -97,7 +97,14 @@ def submit_kyc():
             ON DUPLICATE KEY UPDATE 
                 full_name=VALUES(full_name), age=VALUES(age), farm_size=VALUES(farm_size),
                 aadhaar=VALUES(aadhaar), pan=VALUES(pan), status='pending_admin'
-        ''')
+        ''', (
+            g.current_user['id'],
+            data.get('full_name', g.current_user.get('full_name', '')),
+            data.get('age'),
+            data.get('farm_size'),
+            data.get('aadhaar'),
+            data.get('pan')
+        ))
         conn.commit()
         return jsonify({"message": "KYC submitted to database", "status": "pending_admin"}), 200
     except Exception as e:

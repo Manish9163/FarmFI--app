@@ -35,11 +35,24 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const verifyOtp = async (email, otp) => {
+  const requestOtp = async (identifier) => {
+    if (!identifier) return { success: false, error: 'Identifier is required' };
+    setLoading(true);
+    try {
+      const response = await axios.post(`${API_URL}/request-otp`, { identifier });
+      setLoading(false);
+      return response.data;
+    } catch (err) {
+      setLoading(false);
+      return { success: false, error: err.response?.data?.error || 'Failed to request OTP' };
+    }
+  };
+
+  const verifyOtp = async (identifier, otp) => {
     if (!otp) return { success: false, error: 'OTP is required' };
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/verify-otp`, { email, otp });
+      const response = await axios.post(`${API_URL}/verify-otp`, { identifier, otp });
       if (response.data.token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       }
@@ -52,22 +65,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const resendOtp = async (email) => {
-    try {
-      const response = await axios.post(`${API_URL}/resend-otp`, { email });
-      return response.data;
-    } catch (err) {
-      return { success: false, error: err.response?.data?.error || 'Failed to resend OTP' };
-    }
-  };
-
   const logout = () => {
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, verifyOtp, resendOtp, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, requestOtp, verifyOtp, logout }}>
       {children}
     </AuthContext.Provider>
   );

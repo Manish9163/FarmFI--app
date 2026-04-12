@@ -1,5 +1,5 @@
 // Centralized API configuration
-const BASE_IP = '192.168.0.105';
+const BASE_IP = '192.168.0.108';
 const BASE_PORT = '5000';
 
 export const API_BASE = `http://${BASE_IP}:${BASE_PORT}/api/v1`;

@@ -19,7 +19,7 @@ from routes.admin_routes import admin_bp
 from routes.feedback_routes import feedback_bp
 from routes.payment_routes import payment_bp
 from routes.farm_routes import farm_bp
-from routes.vegetable_routes import vegetable_bp
+from routes.profile_routes import profile_bp
 
 
 def create_app():
@@ -98,7 +98,7 @@ def create_app():
     app.register_blueprint(feedback_bp, url_prefix='/api/v1/feedback')
     app.register_blueprint(payment_bp, url_prefix='/api/v1/payment')
     app.register_blueprint(farm_bp, url_prefix='/api/v1/farm')
-    app.register_blueprint(vegetable_bp, url_prefix='/api/v1/vegetables')
+    app.register_blueprint(profile_bp, url_prefix='/api/v1/profile')
 
     # Static file 
     @app.route('/uploads/<path:filename>')

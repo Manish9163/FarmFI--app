@@ -13,17 +13,6 @@ import { FARM_API } from '../config/api';
 
 const { width } = Dimensions.get('window');
 
-const CARDS = [
-  { icon: Leaf, label: 'Disease Detect', route: 'Disease', color: '#10b981' },
-  { icon: Sprout, label: 'Crop Recommend', route: 'CropRecommendation', color: '#3b82f6' },
-  { icon: Store, label: 'Marketplace', route: 'Marketplace', color: '#f59e0b' },
-  { icon: Landmark, label: 'Credit & Finance', route: 'Credit', color: '#8b5cf6' },
-  { icon: Cloud, label: 'Weather', route: 'Weather', color: '#06b6d4' },
-  { icon: AlertTriangle, label: 'Risk Predictor', route: 'Risk', color: '#ef4444' },
-  { icon: Users, label: 'Workers', route: 'Workers', color: '#ec4899' },
-  { icon: Calculator, label: 'Planting Calendar', route: 'PlantingCalendar', color: '#14b8a6' },
-];
-
 export default function DashboardScreen({ navigation }) {
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
@@ -172,15 +161,14 @@ export default function DashboardScreen({ navigation }) {
   };
 
   const ALL_CARDS = [
-    { icon: Leaf, label: t('dashboard.diseaseDetect'), route: 'Disease', color: '#10b981', roles: ['Farmer', 'Admin','Worker'] },
-    { icon: Sprout, label: t('dashboard.cropRecommend'), route: 'CropRecommendation', color: '#3b82f6', roles: ['Farmer', 'Admin'] },
-    { icon: Store, label: t('dashboard.marketplace'), route: 'Marketplace', color: '#f59e0b', roles: ['Farmer', 'Buyer', 'Worker', 'Admin'] },
-    { icon: Landmark, label: t('dashboard.credit'), route: 'Credit', color: '#8b5cf6', roles: ['Farmer', 'Buyer', 'Worker', 'Admin'] },
+    { icon: Leaf, label: t('dashboard.diseaseDetect'), route: 'Disease', color: '#10b981', roles: ['Farmer','Worker'] },
+    { icon: Sprout, label: t('dashboard.cropRecommend'), route: 'CropRecommendation', color: '#3b82f6', roles: ['Farmer'] },
+    { icon: Store, label: t('dashboard.marketplace'), route: 'Marketplace', color: '#f59e0b', roles: ['Farmer', 'Buyer', 'Worker'] },
+    { icon: Landmark, label: t('dashboard.credit'), route: 'Credit', color: '#8b5cf6', roles: ['Farmer', 'Buyer', 'Worker'] },
     { icon: Cloud, label: t('dashboard.weather'), route: 'Weather', color: '#06b6d4', roles: ['Farmer', 'Worker', 'Admin'] },
-    { icon: ShoppingBag, label: 'Veg Market', route: 'VegetableMarket', color: '#10b981', roles: ['Farmer', 'Buyer', 'Worker', 'Admin'] },
-    { icon: AlertTriangle, label: t('dashboard.riskPredictor'), route: 'Risk', color: '#ef4444', roles: ['Farmer', 'Admin'] },
-    { icon: Users, label: t('dashboard.workers'), route: 'Workers', color: '#ec4899', roles: ['Farmer', 'Worker', 'Admin'] },
-    { icon: Calculator, label: t('dashboard.calendar'), route: 'PlantingCalendar', color: '#14b8a6', roles: ['Farmer', 'Admin'] },
+    { icon: AlertTriangle, label: t('dashboard.riskPredictor'), route: 'Risk', color: '#ef4444', roles: ['Farmer'] },
+    { icon: Users, label: t('dashboard.workers'), route: 'Workers', color: '#ec4899', roles: ['Farmer', 'Worker'] },
+    { icon: Calculator, label: t('dashboard.calendar'), route: 'PlantingCalendar', color: '#14b8a6', roles: ['Farmer'] },
   ];
 
   const CARDS = user?.role
@@ -188,95 +176,120 @@ export default function DashboardScreen({ navigation }) {
     : ALL_CARDS;
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.greeting}>{user ? t('dashboard.welcome') : t('dashboard.hello')}</Text>
-          <Text style={styles.name}>{user?.full_name || t('dashboard.guest')}</Text>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <TouchableOpacity style={styles.langBtn} onPress={toggleLanguage}>
-            <Text style={styles.langText}>{t('common.changeLang')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileBtn} onPress={user ? handleLogout : () => navigation.navigate('Login')}>
-            {user ? <LogOut size={22} color="#fafafa" /> : <LogIn size={22} color="#10b981" />}
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Farm Overview Card - Securely Gated */}
-        {user?.role === 'Buyer' ? (
-          <LinearGradient colors={['#18181b', '#27272a']} style={[styles.overviewCard, { paddingVertical: 32 }]}>
-             <View style={{alignItems: 'center'}}>
-                <View style={{backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 16, borderRadius: 32, marginBottom: 16}}>
-                   <ShoppingBag size={36} color="#10b981" />
-                </View>
-                <Text style={{color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 8}}>Consumer Dashboard</Text>
-                <Text style={{color: '#a1a1aa', fontSize: 14, textAlign: 'center', lineHeight: 22, paddingHorizontal: 12}}>
-                   You have successfully accessed the platform as a verified buyer. Go to the Veg Market below to purchase directly from active, high-yield farmers!
-                </Text>
-             </View>
-          </LinearGradient>
-        ) : user ? (
-          <LinearGradient
-            colors={['#059669', '#10b981']}
-            style={styles.overviewCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <Text style={styles.overviewTitle}>{t('dashboard.farmOverview')}</Text>
-              <TouchableOpacity onPress={openEditor} style={styles.editCapsule}>
-                <Edit3 size={14} color="#fff" style={{marginRight: 6}} />
-                <Text style={{color: '#fff', fontSize: 13, fontWeight: '700'}}>Config</Text>
+    <View style={styles.container}>
+      <LinearGradient 
+        colors={['#09090b', '#18181b', '#09090b']} 
+        style={StyleSheet.absoluteFill}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+      />
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.greeting}>{user ? t('dashboard.welcome') : t('dashboard.hello')}</Text>
+            <Text style={styles.name}>{user?.full_name || t('dashboard.guest')}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity style={styles.langBtn} onPress={toggleLanguage}>
+              <Text style={styles.langText}>{t('common.changeLang')}</Text>
+            </TouchableOpacity>
+            {user && (
+              <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('Profile')}>
+                <Users size={22} color="#10b981" />
               </TouchableOpacity>
-            </View>
+            )}
+            <TouchableOpacity style={styles.profileBtn} onPress={user ? handleLogout : () => navigation.navigate('Login')}>
+              {user ? <LogOut size={22} color="#fafafa" /> : <LogIn size={22} color="#10b981" />}
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          {/* Primary Operations Top Row */}
-          <View style={{ flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.15)', padding: 16, borderRadius: 16, marginBottom: 20, justifyContent: 'space-between' }}>
-             <View>
-               <Text style={{color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600', marginBottom: 4, textTransform: 'uppercase'}}>Main Crop</Text>
-               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                 <Text style={{color: '#fff', fontSize: 18, fontWeight: '800'}}>{farmData.primary_crop}</Text>
-               </View>
-             </View>
-             <View style={{alignItems: 'flex-end'}}>
-               <Text style={{color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600', marginBottom: 4, textTransform: 'uppercase'}}>Water Level</Text>
-               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                 <Droplets size={18} color="#38bdf8" style={{marginRight: 6}} />
-                 <Text style={{color: '#fff', fontSize: 18, fontWeight: '800'}}>{farmData.soil_moisture}%</Text>
-               </View>
-             </View>
-          </View>
-          
-          <View style={styles.overviewStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{farmData.acres}</Text>
-              <Text style={styles.statLabel}>{t('dashboard.acresActive')}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={[styles.statValue, { color: farmData.status.toLowerCase().includes('sick') || farmData.status.toLowerCase().includes('dry') ? '#fcd34d' : '#fff' }]}>
-                {farmData.status}
-              </Text>
-              <Text style={styles.statLabel}>{t('dashboard.cropStatus')}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{liveTemp}°C</Text>
-              <Text style={styles.statLabel}>{t('dashboard.soilTemp')}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 4}}>
-                 {farmData.alerts !== 'None' && <ShieldAlert size={14} color="#f87171" style={{marginRight: 4, marginTop: 2}} />}
-                 <Text style={[styles.statValue, farmData.alerts !== 'None' && {color: '#f87171'}]}>{farmData.alerts}</Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent} 
+          showsVerticalScrollIndicator={false}
+          stickyHeaderIndices={[2]}
+        >
+          {/* Farm Overview Card - Securely Gated */}
+          {user?.role === 'Buyer' ? (
+            <View style={styles.overviewCard}>
+              <LinearGradient 
+                colors={['rgba(39, 39, 42, 0.5)', 'rgba(24, 24, 27, 0.8)']} 
+                style={styles.cardGradient}
+              />
+              <View style={{alignItems: 'center', paddingVertical: 12}}>
+                  <View style={{backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 16, borderRadius: 32, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.2)'}}>
+                    <ShoppingBag size={36} color="#10b981" />
+                  </View>
+                  <Text style={{color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 8}}>Consumer Dashboard</Text>
+                  <Text style={{color: '#94a3b8', fontSize: 13, textAlign: 'center', lineHeight: 20, paddingHorizontal: 12}}>
+                    Welcome to the specialized buyer interface. Explore the marketplace below to connect with local farmers.
+                  </Text>
               </View>
-              <Text style={styles.statLabel}>Active Alerts</Text>
             </View>
-          </View>
-        </LinearGradient>
-        ) : (
-          <LinearGradient colors={['#18181b', '#27272a']} style={[styles.overviewCard, { paddingVertical: 32 }]}>
+          ) : user ? (
+            <View style={styles.overviewCard}>
+              <LinearGradient 
+                colors={['#059669', '#10b981']} 
+                style={styles.cardGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Text style={styles.overviewTitle}>{t('dashboard.farmOverview')}</Text>
+                <TouchableOpacity onPress={openEditor} style={styles.editCapsule}>
+                  <Edit3 size={14} color="#fff" style={{marginRight: 6}} />
+                  <Text style={{color: '#fff', fontSize: 12, fontWeight: '700'}}>Configure</Text>
+                </TouchableOpacity>
+              </View>
+  
+              {/* Primary Operations Top Row */}
+              <View style={{ flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.15)', padding: 16, borderRadius: 20, marginBottom: 20, justifyContent: 'space-between', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                <View>
+                  <Text style={{color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '800', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5}}>Dominant Crop</Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Text style={{color: '#fff', fontSize: 20, fontWeight: '800'}}>{farmData.primary_crop}</Text>
+                  </View>
+                </View>
+                <View style={{alignItems: 'flex-end'}}>
+                  <Text style={{color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: '800', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5}}>Moisture Level</Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Droplets size={18} color="#38bdf8" style={{marginRight: 6}} />
+                    <Text style={{color: '#fff', fontSize: 20, fontWeight: '800'}}>{farmData.soil_moisture}%</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <View style={styles.overviewStats}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{farmData.acres}</Text>
+                  <Text style={styles.statLabel}>{t('dashboard.acresActive')}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: farmData.status.toLowerCase().includes('sick') || farmData.status.toLowerCase().includes('dry') ? '#fcd34d' : '#fff' }]}>
+                    {farmData.status}
+                  </Text>
+                  <Text style={styles.statLabel}>{t('dashboard.cropStatus')}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>{liveTemp}°C</Text>
+                  <Text style={styles.statLabel}>{t('dashboard.soilTemp')}</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 4}}>
+                    {farmData.alerts !== 'None' && <ShieldAlert size={14} color="#f87171" style={{marginRight: 4, marginTop: 2}} />}
+                    <Text style={[styles.statValue, farmData.alerts !== 'None' && {color: '#f87171'}]}>{farmData.alerts}</Text>
+                  </View>
+                  <Text style={styles.statLabel}>Active Alerts</Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View style={[styles.overviewCard, { paddingVertical: 32 }]}>
+              <LinearGradient 
+                colors={['rgba(39, 39, 42, 0.5)', 'rgba(24, 24, 27, 0.8)']} 
+                style={styles.cardGradient}
+              />
              <View style={{alignItems: 'center'}}>
                 <View style={{backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 16, borderRadius: 32, marginBottom: 16}}>
                    <ShieldAlert size={36} color="#10b981" />
@@ -292,7 +305,7 @@ export default function DashboardScreen({ navigation }) {
                    <Text style={{color: '#09090b', fontWeight: '800', fontSize: 15, letterSpacing: 0.5}}>LOGIN / REGISTER</Text>
                 </TouchableOpacity>
              </View>
-          </LinearGradient>
+          </View>
         )}
 
         {/* Dynamic Editor Modal */}
@@ -352,8 +365,11 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </Modal>
 
-        {/* Dashboard Grid */}
-        <Text style={styles.sectionTitle}>{t('dashboard.services')}</Text>
+          {/* Dashboard Grid */}
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16}}>
+            <Text style={styles.sectionTitle}>{t('dashboard.services')}</Text>
+            <View style={{height: 1, flex: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginLeft: 16}} />
+          </View>
         <View style={styles.grid}>
           {CARDS.map((item, idx) => {
             const IconComponent = item.icon;
@@ -392,6 +408,7 @@ export default function DashboardScreen({ navigation }) {
         )}
       </ScrollView>
     </SafeAreaView>
+  </View>
   );
 }
 
@@ -399,6 +416,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#09090b',
+  },
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 24,
   },
   header: {
     flexDirection: 'row',
@@ -448,19 +469,33 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   overviewCard: {
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 24,
     marginBottom: 32,
-    boxShadow: '0px 6px 15px rgba(16, 185, 129, 0.25)',
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 12,
+    overflow: 'hidden',
   },
   editCapsule: { 
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(0,0,0,0.25)', 
+    paddingHorizontal: 14, 
+    paddingVertical: 8, 
+    borderRadius: 20,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.2)' 
   },
   overviewTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#fff',
+    letterSpacing: -0.5
   },
   overviewStats: {
     flexDirection: 'row',
@@ -470,21 +505,26 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     flexGrow: 1,
+    borderWidth: 0.5,
+    borderColor: 'rgba(255,255,255,0.05)'
   },
   statValue: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '900',
     color: '#fff',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 11,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.7)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5
   },
   sectionTitle: {
     fontSize: 20,
@@ -498,14 +538,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   gridCard: {
-    width: (width - 48 - 16) / 2, // 2 columns, padding 24 each side, gap 16
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 16,
+    width: (width - 48 - 14) / 2, 
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 22,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   iconContainer: {
     width: 56,

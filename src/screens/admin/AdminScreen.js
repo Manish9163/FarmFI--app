@@ -16,6 +16,7 @@ import Sidebar, { getSectionInfo } from '../../components/admin/Sidebar';
 import DashboardView from './DashboardView';
 import UsersView from './UsersView';
 import CustomersView from './CustomersView';
+import BuyersView from './BuyersView';
 import WorkersView from './WorkersView';
 import ProductsView from './ProductsView';
 import OrdersView from './OrdersView';
@@ -25,6 +26,7 @@ import CropPredictionsView from './CropPredictionsView';
 import PesticidesView from './PesticidesView';
 import FeedbackView from './FeedbackView';
 import AnalyticsView from './AnalyticsView';
+import KycView from './KycView';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SIDEBAR_WIDTH = SCREEN_WIDTH * 0.75;
@@ -34,6 +36,7 @@ const ENDPOINT_MAP = {
   dashboard: '/dashboard',
   users: '/users',
   customers: '/customers',
+  buyers: '/buyers',
   workers: '/workers',
   products: '/products',
   orders: '/orders',
@@ -43,6 +46,7 @@ const ENDPOINT_MAP = {
   pesticides: '/pesticides',
   feedback: '/feedback',
   analytics: null, // Analytics fetches its own data internally
+  kyc: '/kyc',
 };
 
 export default function AdminScreen({ navigation }) {
@@ -113,6 +117,8 @@ export default function AdminScreen({ navigation }) {
         return <UsersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'customers':
         return <CustomersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
+      case 'buyers':
+        return <BuyersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'workers':
         return <WorkersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'products':
@@ -129,6 +135,8 @@ export default function AdminScreen({ navigation }) {
         return <PesticidesView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'feedback':
         return <FeedbackView data={arrayData} loading={loading} />;
+      case 'kyc':
+        return <KycView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'analytics':
         return <AnalyticsView loading={loading} />;
       default:

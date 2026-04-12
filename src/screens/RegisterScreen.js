@@ -91,6 +91,7 @@ export default function RegisterScreen({ navigation }) {
                     placeholder="e.g. +91 9876543210"
                     placeholderTextColor="rgba(255,255,255,0.3)"
                     keyboardType="phone-pad"
+                    maxLength={10}
                     value={form.phone}
                     onChangeText={(val) => handle('phone', val)}
                   />

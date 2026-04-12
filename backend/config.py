@@ -38,6 +38,8 @@ class Config:
     SMTP_USER     = os.getenv('SMTP_USER', '')
     SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', '')
 
+    FAST2SMS_API_KEY = os.getenv('FAST2SMS_API_KEY', '')
+
     if FLASK_ENV == 'development':
         for dev_origin in (
             'http://localhost:5173',

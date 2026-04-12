@@ -1,53 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Dimensions, ActivityIndicator, Image } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
-import { Eye, EyeOff } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Toast from 'react-native-toast-message';
+// import SmsRetriever from 'react-native-sms-retriever';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation, route }) {
-  const { login, verifyOtp, resendOtp, loading } = useAuth();
-  const [form, setForm] = useState({ email: '', password: '', otp: '' });
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const { requestOtp, verifyOtp, loading } = useAuth();
+  const [form, setForm] = useState({ identifier: '', otp: '' });
   const [step, setStep] = useState(1);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [inputType, setInputType] = useState('default');
   
   const returnTo = route?.params?.returnTo;
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => setResendTimer((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleIdentifierChange = (val) => {
+    // Aggressively swap keyboard to phone layout if string consists entirely of numbers/plus
+    if (/^[0-9+]+$/.test(val) || val === '') setInputType('phone-pad');
+    else setInputType('email-address');
+    setForm({ ...form, identifier: val });
+  };
+
+  // const startSmsListener = async () => {
+  //   try {
+  //     const registered = await SmsRetriever.startSmsRetriever();
+  //     if (registered) {
+  //       SmsRetriever.addSmsListener(event => {
+  //         if (event && event.message) {
+  //           const otpMatch = event.message.match(/\b\d{6}\b/);
+  //           if (otpMatch) {
+  //             setForm(prev => ({ ...prev, otp: otpMatch[0] }));
+  //             SmsRetriever.removeSmsListener();
+  //             submitOtp(otpMatch[0]); // auto submit
+  //           }
+  //         }
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log('SMS Retriever Error:', error);
+  //   }
+  // };
 
   const handle = (name, value) => setForm({ ...form, [name]: value });
 
   const submitLogin = async () => {
-    const result = await login(form.email, form.password);
+    const result = await requestOtp(form.identifier);
     if (result.success) {
-      if (result.requiresOtp) {
-        setStep(2);
-      } else {
-        if (returnTo) navigation.replace(returnTo);
-        else navigation.replace('Dashboard');
+      setStep(2);
+      setResendTimer(30);
+      Toast.show({ type: 'success', text1: 'OTP Sent', text2: result.message });
+      if (Platform.OS === 'android') {
+        startSmsListener();
       }
     } else {
-      Toast.show({ type: 'error', text1: 'Authentication Blocked', text2: result.error || 'Login failed' });
+      Toast.show({ type: 'error', text1: 'Request Failed', text2: result.error || 'Failed to send OTP' });
     }
   };
 
-  const submitOtp = async () => {
-    const result = await verifyOtp(form.email, form.otp);
+  const submitOtp = async (autoOtp = null) => {
+    const currentOtp = autoOtp || form.otp;
+    if (!currentOtp || currentOtp.length < 6) return;
+    
+    const result = await verifyOtp(form.identifier.replace(/\s+/g, ''), currentOtp);
     if (result.success) {
+      Toast.show({ type: 'success', text1: 'Login Successful' });
       if (returnTo) navigation.replace(returnTo);
       else navigation.replace('Dashboard');
     } else {
-      Toast.show({ type: 'error', text1: 'Invalid Verification', text2: result.error });
+      Toast.show({ type: 'error', text1: 'Verification Failed', text2: result.error });
     }
   };
 
   const handleResendOtp = async () => {
-    const result = await resendOtp(form.email);
-    if (!result.success) {
-      Toast.show({ type: 'error', text1: 'Transmission Failed', text2: result.error || 'Failed to resend OTP' });
+    if (resendTimer > 0) return;
+    const result = await requestOtp(form.identifier);
+    if (result.success) {
+      setResendTimer(30);
+      Toast.show({ type: 'success', text1: 'OTP Resent', text2: result.message });
     } else {
-      Toast.show({ type: 'success', text1: 'OTP Regenerated', text2: 'A new security code has been dispatched.' });
+      Toast.show({ type: 'error', text1: 'Failed to Resend', text2: result.error });
     }
   };
 
@@ -63,43 +104,27 @@ export default function LoginScreen({ navigation, route }) {
             />
             <Text style={[styles.logo, { marginBottom: 0 }]}>FarmFi</Text>
           </View>
-          <Text style={styles.title}>{step === 1 ? 'Sign in to your account' : 'Verify Email OTP'}</Text>
-          <Text style={styles.subtitle}>{step === 1 ? 'Predictive Agriculture & Smart Marketplace' : `Enter code sent to ${form.email}`}</Text>
+          <Text style={styles.title}>{step === 1 ? 'Sign in to your account' : 'Verify OTP'}</Text>
+          <Text style={styles.subtitle}>{step === 1 ? 'Enter your Email or Phone Number' : `Enter the 6-digit code sent to ${form.identifier}`}</Text>
 
           {step === 1 ? (
             <View style={{ width: '100%' }}>
               <View style={styles.formGroup}>
-                <Text style={styles.label}>Email Address</Text>
+                <Text style={styles.label}>Email or Phone Number</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="you@example.com"
+                  placeholder="name@example.com or 9876543210"
                   placeholderTextColor="rgba(255,255,255,0.2)"
-                  keyboardType="email-address"
+                  keyboardType={inputType}
+                  maxLength={inputType === 'phone-pad' ? 10 : undefined}
                   autoCapitalize="none"
-                  value={form.email}
-                  onChangeText={(val) => handle('email', val)}
+                  value={form.identifier}
+                  onChangeText={handleIdentifierChange}
                 />
               </View>
 
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
-                  <TextInput
-                    style={[styles.input, { flex: 1, borderWidth: 0 }]}
-                    placeholder="••••••••"
-                    placeholderTextColor="rgba(255,255,255,0.2)"
-                    secureTextEntry={!showPassword}
-                    value={form.password}
-                    onChangeText={(val) => handle('password', val)}
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                    {showPassword ? <EyeOff size={20} color="#94a3b8" /> : <Eye size={20} color="#94a3b8" />}
-                  </TouchableOpacity>
-                </View>
-              </View>
-
               <TouchableOpacity style={styles.primaryBtn} disabled={loading} onPress={submitLogin}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Sign In</Text>}
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Send OTP</Text>}
               </TouchableOpacity>
             </View>
           ) : (
@@ -117,16 +142,18 @@ export default function LoginScreen({ navigation, route }) {
                 />
               </View>
 
-              <TouchableOpacity style={styles.primaryBtn} disabled={loading} onPress={submitOtp}>
+              <TouchableOpacity style={styles.primaryBtn} disabled={loading} onPress={() => submitOtp()}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Verify & Login</Text>}
               </TouchableOpacity>
 
-              <TouchableOpacity style={{ marginTop: 16 }} onPress={handleResendOtp} disabled={loading}>
-                <Text style={styles.resendText}>Resend OTP</Text>
+              <TouchableOpacity style={{ marginTop: 16 }} onPress={handleResendOtp} disabled={loading || resendTimer > 0}>
+                <Text style={[styles.resendText, resendTimer > 0 && { color: '#64748b' }]}>
+                  {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : 'Didn’t receive OTP? Resend'}
+                </Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={{ marginTop: 8 }} onPress={() => setStep(1)}>
-                <Text style={styles.backText}>Back to Login</Text>
+                <Text style={styles.backText}>Change Email/Phone</Text>
               </TouchableOpacity>
             </View>
           )}

@@ -15,8 +15,8 @@ def register():
         return jsonify({'error': f'Missing fields: {", ".join(missing)}'}), 400
 
     role = data.get('role', 'Farmer')
-    if role not in ('Farmer', 'Worker', 'Buyer'):
-        return jsonify({'error': 'Role must be Farmer, Worker, or Buyer'}), 400
+    if role not in ('Farmer', 'Worker'):          # Admin created via seed only
+        return jsonify({'error': 'Role must be Farmer or Worker'}), 400
 
     result = auth_service.register(
         full_name=data['full_name'].strip(),
@@ -47,25 +47,25 @@ def login():
 @auth_bp.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.get_json(silent=True) or {}
-    if not data.get('email') or not data.get('otp'):
-        return jsonify({'error': 'Email and OTP required'}), 400
+    if not data.get('identifier') or not data.get('otp'):
+        return jsonify({'error': 'Identifier and OTP required'}), 400
         
     result = auth_service.verify_otp(
-        email=data['email'].strip().lower(),
+        identifier=data['identifier'].strip(),
         otp=data['otp'].strip()
     )
     if not result['success']:
         return jsonify({'error': result['error']}), 401
     return jsonify(result), 200
 
-@auth_bp.route('/resend-otp', methods=['POST'])
-def resend_otp():
+@auth_bp.route('/request-otp', methods=['POST'])
+def request_otp():
     data = request.get_json(silent=True) or {}
-    if not data.get('email'):
-        return jsonify({'error': 'Email required'}), 400
+    if not data.get('identifier'):
+        return jsonify({'error': 'Identifier required'}), 400
         
-    result = auth_service.resend_otp(
-        email=data['email'].strip().lower()
+    result = auth_service.request_otp(
+        identifier=data['identifier'].strip()
     )
     if not result['success']:
         return jsonify({'error': result['error']}), 400

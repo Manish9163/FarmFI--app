@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from '
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   X, LayoutDashboard, Users, ShoppingBag, Package, ClipboardList,
-  CreditCard, Briefcase, MessageSquare, BarChart3, Bug, Sprout, Shield, UserPlus,
+  CreditCard, Briefcase, MessageSquare, BarChart3, Bug, Sprout, Shield, UserPlus, ShieldAlert
 } from 'lucide-react-native';
 
 export const MENU_SECTIONS = [
@@ -17,15 +17,17 @@ export const MENU_SECTIONS = [
     title: 'People',
     items: [
       { key: 'users', label: 'All Users', icon: Users, color: '#3b82f6' },
-      { key: 'customers', label: 'Customers', icon: UserPlus, color: '#8b5cf6' },
+      { key: 'customers', label: 'Farmers', icon: UserPlus, color: '#8b5cf6' },
+      { key: 'buyers', label: 'Buyers', icon: Users, color: '#f59e0b' },
       { key: 'workers', label: 'Workers', icon: Briefcase, color: '#ec4899' },
     ],
   },
   {
     title: 'Commerce',
     items: [
-      { key: 'products', label: 'Products', icon: Package, color: '#f59e0b' },
-      { key: 'orders', label: 'Orders', icon: ShoppingBag, color: '#06b6d4' },
+      { key: 'products', label: 'Inputs Store', icon: Package, color: '#f59e0b' },
+      { key: 'orders', label: 'Market Orders', icon: ShoppingBag, color: '#06b6d4' },
+      { key: 'kyc', label: 'KYC Approvals', icon: ShieldAlert, color: '#ef4444' },
       { key: 'credit', label: 'Credit', icon: CreditCard, color: '#14b8a6' },
     ],
   },
