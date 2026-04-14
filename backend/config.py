@@ -27,7 +27,7 @@ class Config:
     # Razorpay
     RAZORPAY_KEY_ID     = os.getenv('RAZORPAY_KEY_ID', '')
     RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
-    MAX_ONLINE_TXN_INR  = float(os.getenv('MAX_ONLINE_TXN_INR', 5000))
+    MAX_ONLINE_TXN_INR  = float(os.getenv('MAX_ONLINE_TXN_INR', 5000)) // once you build for production level remove this line
     WEATHER_BASE_URL = os.getenv('WEATHER_BASE_URL', 'https://api.weatherapi.com/v1')
 
     FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
