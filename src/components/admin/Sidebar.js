@@ -18,7 +18,6 @@ export const MENU_SECTIONS = [
     items: [
       { key: 'users', label: 'All Users', icon: Users, color: '#3b82f6' },
       { key: 'customers', label: 'Farmers', icon: UserPlus, color: '#8b5cf6' },
-      { key: 'buyers', label: 'Buyers', icon: Users, color: '#f59e0b' },
       { key: 'workers', label: 'Workers', icon: Briefcase, color: '#ec4899' },
     ],
   },

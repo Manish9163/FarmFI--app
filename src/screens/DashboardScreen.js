@@ -163,8 +163,8 @@ export default function DashboardScreen({ navigation }) {
   const ALL_CARDS = [
     { icon: Leaf, label: t('dashboard.diseaseDetect'), route: 'Disease', color: '#10b981', roles: ['Farmer','Worker'] },
     { icon: Sprout, label: t('dashboard.cropRecommend'), route: 'CropRecommendation', color: '#3b82f6', roles: ['Farmer'] },
-    { icon: Store, label: t('dashboard.marketplace'), route: 'Marketplace', color: '#f59e0b', roles: ['Farmer', 'Buyer', 'Worker'] },
-    { icon: Landmark, label: t('dashboard.credit'), route: 'Credit', color: '#8b5cf6', roles: ['Farmer', 'Buyer', 'Worker'] },
+    { icon: Store, label: t('dashboard.marketplace'), route: 'Marketplace', color: '#f59e0b', roles: ['Farmer', 'Worker'] },
+    { icon: Landmark, label: t('dashboard.credit'), route: 'Credit', color: '#8b5cf6', roles: ['Farmer', 'Worker'] },
     { icon: Cloud, label: t('dashboard.weather'), route: 'Weather', color: '#06b6d4', roles: ['Farmer', 'Worker', 'Admin'] },
     { icon: AlertTriangle, label: t('dashboard.riskPredictor'), route: 'Risk', color: '#ef4444', roles: ['Farmer'] },
     { icon: Users, label: t('dashboard.workers'), route: 'Workers', color: '#ec4899', roles: ['Farmer', 'Worker'] },
@@ -223,7 +223,7 @@ export default function DashboardScreen({ navigation }) {
                   </View>
                   <Text style={{color: '#fff', fontSize: 20, fontWeight: '800', marginBottom: 8}}>Consumer Dashboard</Text>
                   <Text style={{color: '#94a3b8', fontSize: 13, textAlign: 'center', lineHeight: 20, paddingHorizontal: 12}}>
-                    Welcome to the specialized buyer interface. Explore the marketplace below to connect with local farmers.
+                    Explore the marketplace below for farmers.
                   </Text>
               </View>
             </View>

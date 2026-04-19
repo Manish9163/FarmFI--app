@@ -10,5 +10,4 @@ def allowed_file(filename: str) -> bool:
     )
 
 def sanitize_filename(filename: str) -> str:
-    """Strip path separators to prevent directory traversal."""
     return os.path.basename(filename).replace(' ', '_')

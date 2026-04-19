@@ -101,8 +101,8 @@ export default function RegisterScreen({ navigation }) {
               <View style={styles.formGroup}>
                 <Text style={styles.label}>Account Identity Type</Text>
                 <View style={styles.roleContainer}>
-                   {['Farmer', 'Buyer', 'Worker'].map(role => (
-                     <TouchableOpacity 
+                   {['Farmer', 'Worker'].map(role => (
+                     <TouchableOpacity
                         key={role} 
                         style={[styles.roleBtn, form.role === role && styles.roleBtnActive]}
                         onPress={() => handle('role', role)}>

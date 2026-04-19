@@ -3,9 +3,7 @@ import requests
 from config import Config
 
 def send_sms(phone: str, otp: str) -> bool:
-    """
-    Sends OTP via Fast2SMS Quick SMS API.
-    """
+
     api_key = Config.FAST2SMS_API_KEY
     if not api_key:
         print(f"\n--- MOCK SMS ---\nTO: {phone}\nOTP: {otp}\n----------------\n")

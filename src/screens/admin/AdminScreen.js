@@ -16,7 +16,6 @@ import Sidebar, { getSectionInfo } from '../../components/admin/Sidebar';
 import DashboardView from './DashboardView';
 import UsersView from './UsersView';
 import CustomersView from './CustomersView';
-import BuyersView from './BuyersView';
 import WorkersView from './WorkersView';
 import ProductsView from './ProductsView';
 import OrdersView from './OrdersView';
@@ -36,7 +35,6 @@ const ENDPOINT_MAP = {
   dashboard: '/dashboard',
   users: '/users',
   customers: '/customers',
-  buyers: '/buyers',
   workers: '/workers',
   products: '/products',
   orders: '/orders',
@@ -117,8 +115,6 @@ export default function AdminScreen({ navigation }) {
         return <UsersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'customers':
         return <CustomersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
-      case 'buyers':
-        return <BuyersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'workers':
         return <WorkersView data={arrayData} loading={loading} onRefresh={onRefresh} />;
       case 'products':

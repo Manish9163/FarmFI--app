@@ -46,7 +46,6 @@ export default function ProfileScreen({ navigation }) {
   const getRoleBadge = (role) => {
     const colors = {
       'Farmer': { bg: 'rgba(16,185,129,0.15)', text: '#10b981' },
-      'Buyer': { bg: 'rgba(59,130,246,0.15)', text: '#3b82f6' },
       'Worker': { bg: 'rgba(236,72,153,0.15)', text: '#ec4899' },
     };
     const c = colors[role] || { bg: 'rgba(148,163,184,0.15)', text: '#94a3b8' };
@@ -194,13 +193,6 @@ export default function ProfileScreen({ navigation }) {
               </View>
             </>
           )}
-          {profile.role === 'Buyer' && (
-            <View style={styles.statCard}>
-              <CreditCard size={20} color="#8b5cf6" />
-              <Text style={styles.statNum}>{'\u20B9'}{parseFloat(profile.purchases?.total_spent || 0).toFixed(0)}</Text>
-              <Text style={styles.statLabel}>Total Spent</Text>
-            </View>
-          )}
         </View>
 
         {/* ===== CREDIT SECTION (Farmers Only) ===== */}
@@ -266,7 +258,6 @@ export default function ProfileScreen({ navigation }) {
                   <Text style={styles.orderMeta}>
                     {order.quantity_kg} kg × {'\u20B9'}{order.price_per_kg}
                     {activeTab === 'overview' && order.farmer_name ? ` • ${order.farmer_name}` : ''}
-                    {activeTab === 'orders' && order.buyer_name ? ` • ${order.buyer_name}` : ''}
                   </Text>
                 </View>
                 <View style={{alignItems: 'flex-end'}}>
@@ -282,12 +273,6 @@ export default function ProfileScreen({ navigation }) {
 
         {/* ===== QUICK ACTIONS ===== */}
         <View style={styles.actionsRow}>
-          {profile.role === 'Buyer' && (
-            <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Marketplace')}>
-              <ShoppingBag size={18} color="#3b82f6" />
-              <Text style={styles.actionText}>Go Shopping</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('Credit')}>
             <ShieldCheck size={18} color="#f59e0b" />
             <Text style={styles.actionText}>KYC / Credit</Text>
